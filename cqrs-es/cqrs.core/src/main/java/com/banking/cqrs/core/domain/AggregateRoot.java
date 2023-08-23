@@ -16,18 +16,14 @@ public abstract class AggregateRoot {
     private final Logger logger = Logger.getLogger(AggregateRoot.class.getName());
 
     public String getId() {
-        return id;
+        return this.id;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public int getVersion(){
+        return this.version;
     }
 
-    public int getVersion() {
-        return version;
-    }
-
-    public void setVersion(int version) {
+    public void setVersion(int version){
         this.version = version;
     }
 
@@ -39,17 +35,17 @@ public abstract class AggregateRoot {
         this.changes.clear();
     }
 
-    public void applyChange(BaseEvent event, Boolean isNewEvent){
+    protected void applyChange(BaseEvent event, Boolean isNewEvent){
         try{
             var method = getClass().getDeclaredMethod("apply", event.getClass());
             method.setAccessible(true);
             method.invoke(this, event);
-        }catch (NoSuchMethodException e){
+        }catch(NoSuchMethodException e){
             logger.log(Level.WARNING, MessageFormat.format("El metodo apply no fue encontrado para {0}", event.getClass().getName()));
-        }catch (Exception e){
+        }catch(Exception e){
             logger.log(Level.SEVERE, "Errores aplicando el evento al aggregate", e);
-        }finally {
-            if (isNewEvent){
+        }finally{
+            if(isNewEvent){
                 changes.add(event);
             }
         }
@@ -62,4 +58,7 @@ public abstract class AggregateRoot {
     public void replayEvents(Iterable<BaseEvent> events){
         events.forEach(event -> applyChange(event, false));
     }
+
 }
+
+

@@ -17,20 +17,18 @@ import java.util.logging.Logger;
 @RestController
 @RequestMapping(path = "/api/v1/closeBankAccount")
 public class CloseAccountController {
-
     private final Logger logger = Logger.getLogger(CloseAccountController.class.getName());
 
     @Autowired
     private CommandDispatcher commandDispatcher;
 
-    @DeleteMapping(path = "/{id}")
-    public ResponseEntity<BaseResponse> closeAccount(@PathVariable(value = "id") String id){
-        try {
-            CloseAccountCommand command = new CloseAccountCommand(id);
-            commandDispatcher.send(command);
-            return new ResponseEntity<>(new BaseResponse("Se cerro la cuenta bancaria exitosamente"), HttpStatus.OK);
 
-        }catch (IllegalStateException | AggregateNotFoundException e){
+    @DeleteMapping(path = "/{id}")
+    public ResponseEntity<BaseResponse> closeAccount(@PathVariable(value="id") String id){
+        try{
+            commandDispatcher.send(new CloseAccountCommand(id));
+            return new ResponseEntity<>(new BaseResponse("Se cerro la cuenta bancaria exitosamente"), HttpStatus.OK);
+        }catch(IllegalStateException  | AggregateNotFoundException e){
             logger.log(Level.WARNING, MessageFormat.format("El cliente envio un request con errores {0} ", e.toString()));
             return new ResponseEntity<>(new BaseResponse(e.toString()), HttpStatus.BAD_REQUEST);
         }catch (Exception e){
